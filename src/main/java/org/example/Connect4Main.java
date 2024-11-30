@@ -4,9 +4,17 @@ import java.io.IOException;
 import java.io.FileWriter;
 import java.util.Random;
 import java.util.Scanner;
-
+/*import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+*/
 final class Connect4Main {
-
+    /*
+        private static final String DB_URL = "jdbc:mysql://localhost:3306/connect4";
+        private static final String DB_USER = "root";
+        private static final String DB_PASSWORD = "";
+    */
     private Connect4Main() {
         throw new UnsupportedOperationException(
                 "Ez egy utility class és nem lehet példányosítani");
@@ -16,96 +24,104 @@ final class Connect4Main {
      */
     public static final int SOR = 6;
     /**
-    * Leírja az oszlopok számát.
-    */
+     * Leírja az oszlopok számát.
+     */
     public static final int OSZLOP = 7;
     /**
-    * Leírja a játékban megtehető maximum lépéseket.
-    */
+     * Leírja a játékban megtehető maximum lépéseket.
+     */
     public static final int MAX_LEPES = 42;
     /**
-    * Megkeresi hány újabb korong kell a győzelemhez.
-    */
+     * Megkeresi hány újabb korong kell a győzelemhez.
+     */
     public static final int MAX_TAVOLSAG = 3;
 
     public static void main(final String[] args) {
         Scanner be = new Scanner(System.in);
         System.out.println("Kérem adja meg a játékos nevét!");
         String nev = be.nextLine();
+        boolean playAgain = true;
+        while (playAgain) {
+            //itt határozuk meg a méreteit (sor és oszlop)
+            char[][] mezo = new char[SOR][OSZLOP];
 
-        //itt határozuk meg a méreteit (sor és oszlop)
-        char[][] mezo = new char[SOR][OSZLOP];
-
-        for (int sor = 0; sor < mezo.length; sor++) {
-            for (int oszlop = 0; oszlop < mezo[0].length; oszlop++) {
-                mezo[sor][oszlop] = ' ';
-            }
-        }
-
-        int kor = 1;
-        char jatekos = 'S';
-        boolean nyertes = false;
-
-        //egy kör lejátszása
-        while (!nyertes && kor <= MAX_LEPES) {
-            boolean helyesLepes;
-            int lepes;
-            if (jatekos == 'S') {
-                do {
-                    megjelenit(mezo);
-
-                    System.out.print("Válasszon egy mezőt: ");
-                    lepes = be.nextInt();
-                    while (lepes >= OSZLOP) {
-                        System.out.println("Helytelen, lépés, lépjen újra");
-                        lepes = be.nextInt();
-                    }
-
-                    //megnézi hogy helyes-e a lépés
-                    helyesLepes = ellenorzes(lepes, mezo);
-
-                } while (!helyesLepes);
-            } else {
-
-                //átvált a gépre
-                System.out.println("A gép köre következik");
-                lepes = ailepes(mezo);
-                System.out.println("A gép a " + lepes + " oszlopba lépett.");
-            }
-            //"beledobja" a korongot
-            for (int sor = mezo.length - 1; sor >= 0; sor--) {
-                if (mezo[sor][lepes] == ' ') {
-                    mezo[sor][lepes] = jatekos;
-                    break;
+            for (int sor = 0; sor < mezo.length; sor++) {
+                for (int oszlop = 0; oszlop < mezo[0].length; oszlop++) {
+                    mezo[sor][oszlop] = ' ';
                 }
             }
+            int kor = 1;
+            char jatekos = 'S';
+            boolean nyertes = false;
 
-            //megnézi van-e nyertes
-            nyertes = gyoztes(jatekos, mezo);
+            //egy kör lejátszása
+            while (!nyertes && kor <= MAX_LEPES) {
+                boolean helyesLepes;
+                int lepes;
+                if (jatekos == 'S') {
+                    do {
+                        megjelenit(mezo);
 
-            //játékos váltás
-            jatekos = (jatekos == 'S') ? 'P' : 'S';
+                        System.out.print("Válasszon egy mezőt: ");
+                        lepes = be.nextInt();
+                        while (lepes >= OSZLOP) {
+                            System.out.println("Helytelen, lépés, lépjen újra");
+                            lepes = be.nextInt();
+                        }
 
-            kor++;
-        }
-        megjelenit(mezo);
+                        //megnézi hogy helyes-e a lépés
+                        helyesLepes = ellenorzes(lepes, mezo);
 
-        if (nyertes) {
-            if (jatekos == 'S') {
-                System.out.println("A gép nyert");
-            } else {
-                System.out.println(nev + " nyert");
+                    } while (!helyesLepes);
+                } else {
+
+                    //átvált a gépre
+                    System.out.println("A gép köre következik");
+                    lepes = ailepes(mezo);
+                    System.out.println("A gép a " + lepes
+                            + " oszlopba lépett.");
+                }
+                //"beledobja" a korongot
+                for (int sor = mezo.length - 1; sor >= 0; sor--) {
+                    if (mezo[sor][lepes] == ' ') {
+                        mezo[sor][lepes] = jatekos;
+                        break;
+                    }
+                }
+
+                //megnézi van-e nyertes
+                nyertes = gyoztes(jatekos, mezo);
+
+                //játékos váltás
+                jatekos = (jatekos == 'S') ? 'P' : 'S';
+
+                kor++;
             }
-        } else { //igen, lehet döntetlen is
-            System.out.println("Döntetlen");
-        }
-        try {
-            mezoFileba(mezo);
-        } catch (IOException e) {
-            System.out.println("Hiba történt a fájl írásakor: "
-                    + e.getMessage());
-        }
+            megjelenit(mezo);
 
+            if (nyertes) {
+                if (jatekos == 'S') {
+                    System.out.println("A gép nyert");
+                } else {
+                    System.out.println(nev + " nyert");
+                }
+            } else { //igen, lehet döntetlen is
+                System.out.println("Döntetlen");
+            }
+            try {
+                mezoFileba(mezo);
+            } catch (IOException e) {
+                System.out.println("Hiba történt a fájl írásakor: "
+                        + e.getMessage());
+            }
+
+
+            System.out.println("Szeretne új játékot játszani? (igen/nem)");
+            String response = be.next().toLowerCase();
+            playAgain = response.equals("igen");
+        }
+        System.out.println("Köszönjük a játékot!");
+        be.close();
     }
 
     //ez a rész felel a mező megjelenítéséért
@@ -131,7 +147,7 @@ final class Connect4Main {
         System.out.println();
     }
 
-    private static boolean ellenorzes(final int oszlop, final char[][] mezo) {
+    static boolean ellenorzes(final int oszlop, final char[][] mezo) {
         //leteszteli hogy megfelel-e az oszlop
         if (oszlop < 0 || oszlop > mezo[0].length) {
             System.out.println("Helytelen, lépés, lépjen újra");
@@ -148,7 +164,7 @@ final class Connect4Main {
         return true;
     }
 
-    private static boolean gyoztes(final char jatekos, final char[][] mezo) {
+    static boolean gyoztes(final char jatekos, final char[][] mezo) {
         //megnézi hogy van-e 4 korong vízszintesen
         for (char[] chars : mezo) {
             for (int oszlop = 0; oszlop < mezo[0].length - MAX_TAVOLSAG;
@@ -205,7 +221,7 @@ final class Connect4Main {
     egyedüli hátul ütő, hogy nem tudtam megoldani azt az esetet
     amikor illegális (nem helyes lépést) hajt végre
     */
-    private static int ailepes(final char[][] mezo) {
+    static int ailepes(final char[][] mezo) {
         //a Random-mal később fog foglalkozni, lényegében arra van,
         // hogy valahova ledobja a korongot
         Random rand = new Random();
@@ -261,7 +277,7 @@ final class Connect4Main {
     /*file-ba írás
     kiírja a pálya végső állapotát
     */
-    private static void mezoFileba(final char[][] mezo) throws IOException {
+    static void mezoFileba(final char[][] mezo) throws IOException {
         try (BufferedWriter writer =
                      new BufferedWriter(new FileWriter("vegso_allas.txt"))) {
             writer.write(" 0 1 2 3 4 5 6\n");
@@ -278,4 +294,5 @@ final class Connect4Main {
         }
     }
 }
+
 //MF DOOM
