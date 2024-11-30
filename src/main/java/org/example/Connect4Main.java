@@ -11,13 +11,21 @@ final class Connect4Main {
         throw new UnsupportedOperationException(
                 "Ez egy utility class és nem lehet példányosítani");
     }
-    //leírja a sorok számát
+    /**
+     * Leírja a sorok számát.
+     */
     public static final int SOR = 6;
-    //leírja az oszlopok számát
+    /**
+    * Leírja az oszlopok számát.
+    */
     public static final int OSZLOP = 7;
-    //leírja a játékban megtehető maximum lépéseket
+    /**
+    * Leírja a játékban megtehető maximum lépéseket.
+    */
     public static final int MAX_LEPES = 42;
-    //megkeresi hány újabb korong kell a győzelemhez
+    /**
+    * Megkeresi hány újabb korong kell a győzelemhez.
+    */
     public static final int MAX_TAVOLSAG = 3;
 
     public static void main(final String[] args) {
@@ -103,11 +111,12 @@ final class Connect4Main {
     //ez a rész felel a mező megjelenítéséért
     private static void megjelenit(final char[][] mezo) {
         System.out.println(" 0 1 2 3 4 5 6");
-        //mivel itt nem tudom beállítani neki hogy
-        //"ha az 1-es számot ütjuk be, a bal szélső (első) oszlopba dobja"
-        //ezért csak úgy tudtam megoldani hogy 0-val kezdődik
-        //ezért kelle korábban letesztelnem,
-        //hogy nagyobb számot írtak-e be mint 6
+        /*mivel itt nem tudom beállítani neki hogy
+        "ha az 1-es számot ütjuk be, a bal szélső (első) oszlopba dobja"
+        ezért csak úgy tudtam megoldani hogy 0-val kezdődik
+        ezért kelle korábban letesztelnem,
+        hogy nagyobb számot írtak-e be mint 6
+        */
         System.out.println("---------------");
         for (char[] chars : mezo) {
             System.out.print("|");
@@ -192,16 +201,18 @@ final class Connect4Main {
         return false;
     }
 
-    //az "AI" lépései
-    //egyedüli hátul ütő, hogy nem tudtam megoldani azt az esetet
-    //amikor illegális (nem helyes lépést) hajt végre
+    /*az "AI" lépései
+    egyedüli hátul ütő, hogy nem tudtam megoldani azt az esetet
+    amikor illegális (nem helyes lépést) hajt végre
+    */
     private static int ailepes(final char[][] mezo) {
         //a Random-mal később fog foglalkozni, lényegében arra van,
         // hogy valahova ledobja a korongot
         Random rand = new Random();
-        //ezzel dobja le a korongot a gépnek
-        //ezek mellet egy picit csal, mert a fő feladata,
-        //hogy blokkolja a játékost, és persze keres egy helyes (nyerő) lépést
+        /*ezzel dobja le a korongot a gépnek
+        ezek mellet egy picit csal, mert a fő feladata,
+        hogy blokkolja a játékost, és persze keres egy helyes (nyerő) lépést
+         */
         for (int oszlop = 0; oszlop < OSZLOP; oszlop++) {
             if (ellenorzes(oszlop, mezo)) {
                 //szimulál egy lépést
@@ -247,8 +258,9 @@ final class Connect4Main {
         return lepes;
     }
 
-    //file-ba írás
-    //kiírja a pálya végső állapotát
+    /*file-ba írás
+    kiírja a pálya végső állapotát
+    */
     private static void mezoFileba(final char[][] mezo) throws IOException {
         try (BufferedWriter writer =
                      new BufferedWriter(new FileWriter("vegso_allas.txt"))) {
