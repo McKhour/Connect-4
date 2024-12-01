@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="hu"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Connect4Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Connect 4 Game</a> &gt; <a href="index.source.html" class="el_package">org.example</a> &gt; <span class="el_source">Connect4Main.java</span></div><h1>Connect4Main.java</h1><pre class="source lang-java linenums">package org.example;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Random;
+import java.util.Scanner;
+import java.sql.PreparedStatement;
+import java.util.concurrent.TimeUnit;
+
+final class Connect4Main {
+
+    /**
+     * Tartalmazza a jdbc-hez tartozó URL-t.
+     */
+    public static final String URL = &quot;jdbc:mysql://localhost:3306/connect4&quot;;
+    /**
+     * Tartalmazza a jdbc-hez tartozó belépést.
+     */
+    public static final String USER = &quot;root&quot;;
+    /**
+     * Ez üresen marad.
+     */
+    public static final String PASSWORD = &quot;&quot;;
+
+<span class="nc" id="L30">    private Connect4Main() {</span>
+<span class="nc" id="L31">        throw new UnsupportedOperationException(</span>
+                &quot;Ez egy utility class és nem lehet példányosítani&quot;);
+    }
+    /**
+     * Leírja a sorok számát.
+     */
+    public static final int SOR = 6;
+    /**
+     * Leírja az oszlopok számát.
+     */
+    public static final int OSZLOP = 7;
+    /**
+     * Leírja a játékban megtehető maximum lépéseket.
+     */
+    public static final int MAX_LEPES = 42;
+    /**
+     * Megkeresi hány újabb korong kell a győzelemhez.
+     */
+    public static final int MAX_TAVOLSAG = 3;
+    /**
+     * Őszinte leszek, a checkstyle miatt csinálom már csak ezt.
+     */
+    public static final int HARMAS = 3;
+
+    public static void main(final String[] args) throws InterruptedException {
+
+<span class="nc" id="L57">        Scanner donto = new Scanner(System.in);</span>
+<span class="nc" id="L58">        System.out.println(&quot;&quot;&quot;</span>
+                Válassza ki mit szeretne:
+                Játék indítása: \t1
+                 Pont táblázat: \t2&quot;&quot;&quot;);
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (donto.nextInt() == 2) {</span>
+<span class="nc" id="L63">                System.out.println(&quot;------------------------------&quot;);</span>
+                try {
+<span class="nc" id="L65">                    Class.forName(&quot;com.mysql.cj.jdbc.Driver&quot;);</span>
+<span class="nc" id="L66">                    Connection connection =</span>
+<span class="nc" id="L67">                            DriverManager.getConnection(URL, USER, PASSWORD);</span>
+<span class="nc" id="L68">                    Statement statement = connection.createStatement();</span>
+<span class="nc" id="L69">                    ResultSet resultSet =</span>
+<span class="nc" id="L70">                            statement.executeQuery(&quot;select * from pontok&quot;);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                    while (resultSet.next()) {</span>
+<span class="nc" id="L72">                        System.out.println(resultSet.getInt(1) + &quot; &quot;</span>
+<span class="nc" id="L73">                                + resultSet.getString(2) + &quot; &quot;</span>
+<span class="nc" id="L74">                                + resultSet.getInt(HARMAS));</span>
+                    }
+<span class="nc" id="L76">                } catch (Exception e) {</span>
+<span class="nc" id="L77">                    throw new RuntimeException(e);</span>
+<span class="nc" id="L78">                }</span>
+<span class="nc" id="L79">                System.out.println(&quot;------------------------------&quot;);</span>
+<span class="nc" id="L80">                System.out.println(&quot;A visszalépéshez nyomja meg a 0-s gombot!&quot;);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                if (donto.nextInt() != 0) {</span>
+<span class="nc" id="L82">                    System.out.println(&quot;Igazából mindegy mit nyom meg&quot;);</span>
+<span class="nc" id="L83">                    TimeUnit.SECONDS.sleep(1);</span>
+                }
+<span class="nc" id="L85">                System.out.println(&quot;Kezdődjék a játék!&quot;);</span>
+            } else {
+<span class="nc" id="L87">                System.out.println(&quot;Kérem helyes értéket adjon legközelebb&quot;);</span>
+            }
+<span class="nc" id="L89">        System.out.println(&quot;Kezdődjék a játék&quot;);</span>
+        //donto.close();
+<span class="nc" id="L91">        TimeUnit.SECONDS.sleep(1);</span>
+<span class="nc" id="L92">        System.out.println(&quot;Kérem adja meg a játékos nevét!&quot;);</span>
+<span class="nc" id="L93">        Scanner be = new Scanner(System.in);</span>
+<span class="nc" id="L94">        String nev = be.nextLine();</span>
+<span class="nc" id="L95">        Jatekos player = new Jatekos(nev, 0);</span>
+<span class="nc" id="L96">        boolean ujabbKor = true;</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        while (ujabbKor) {</span>
+            //itt határozuk meg a méreteit (sor és oszlop)
+<span class="nc" id="L99">            char[][] mezo = new char[SOR][OSZLOP];</span>
+
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            for (int sor = 0; sor &lt; mezo.length; sor++) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                for (int oszlop = 0; oszlop &lt; mezo[0].length; oszlop++) {</span>
+<span class="nc" id="L103">                    mezo[sor][oszlop] = ' ';</span>
+                }
+            }
+<span class="nc" id="L106">            int kor = 1;</span>
+<span class="nc" id="L107">            char jatekos = 'S';</span>
+<span class="nc" id="L108">            boolean nyertes = false;</span>
+
+            //egy kör lejátszása
+<span class="nc bnc" id="L111" title="All 4 branches missed.">            while (!nyertes &amp;&amp; kor &lt;= MAX_LEPES) {</span>
+                boolean helyesLepes;
+                int lepes;
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                if (jatekos == 'S') {</span>
+                    do {
+<span class="nc" id="L116">                        megjelenit(mezo);</span>
+
+<span class="nc" id="L118">                        System.out.print(&quot;Válasszon egy mezőt: &quot;);</span>
+<span class="nc" id="L119">                        lepes = be.nextInt() - 1;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                        while (lepes &gt;= OSZLOP) {</span>
+<span class="nc" id="L121">                            System.out.println(&quot;Helytelen, lépés, lépjen újra&quot;);</span>
+<span class="nc" id="L122">                            lepes = be.nextInt() - 1;</span>
+                        }
+
+                        //megnézi hogy helyes-e a lépés
+<span class="nc" id="L126">                        helyesLepes = ellenorzes(lepes, mezo);</span>
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">                    } while (!helyesLepes);</span>
+                } else {
+
+                    //átvált a gépre
+<span class="nc" id="L132">                    System.out.println(&quot;A gép köre következik&quot;);</span>
+<span class="nc" id="L133">                    TimeUnit.SECONDS.sleep(2);</span>
+<span class="nc" id="L134">                    lepes = ailepes(mezo);</span>
+<span class="nc" id="L135">                    System.out.println(&quot;A gép a &quot; + (lepes + 1)</span>
+                            + &quot; oszlopba lépett.&quot;);
+                }
+                //&quot;beledobja&quot; a korongot
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                for (int sor = mezo.length - 1; sor &gt;= 0; sor--) {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                    if (mezo[sor][lepes] == ' ') {</span>
+<span class="nc" id="L141">                        mezo[sor][lepes] = jatekos;</span>
+<span class="nc" id="L142">                        break;</span>
+                    }
+                }
+
+                //megnézi van-e nyertes
+<span class="nc" id="L147">                nyertes = gyoztes(jatekos, mezo);</span>
+
+                //játékos váltás
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                jatekos = (jatekos == 'S') ? 'P' : 'S';</span>
+
+<span class="nc" id="L152">                kor++;</span>
+<span class="nc" id="L153">            }</span>
+<span class="nc" id="L154">            megjelenit(mezo);</span>
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (nyertes) {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                if (jatekos == 'S') {</span>
+<span class="nc" id="L158">                    System.out.println(&quot;A gép nyert&quot;);</span>
+                } else {
+<span class="nc" id="L160">                    System.out.println(nev + &quot; nyert&quot;);</span>
+<span class="nc" id="L161">                    player = player.incrementScore();</span>
+                }
+            } else { //igen, lehet döntetlen is
+<span class="nc" id="L164">                System.out.println(&quot;Döntetlen&quot;);</span>
+            }
+            try {
+<span class="nc" id="L167">                mezoFileba(mezo);</span>
+<span class="nc" id="L168">            } catch (IOException e) {</span>
+<span class="nc" id="L169">                System.out.println(&quot;Hiba történt a fájl írásakor: &quot;</span>
+<span class="nc" id="L170">                        + e.getMessage());</span>
+<span class="nc" id="L171">            }</span>
+
+<span class="nc" id="L173">            TimeUnit.SECONDS.sleep(2);</span>
+<span class="nc" id="L174">            System.out.println(&quot;Szeretne új játékot játszani? (igen/nem)&quot;);</span>
+<span class="nc" id="L175">            String valasz = be.next().toLowerCase();</span>
+<span class="nc" id="L176">            ujabbKor = valasz.equals(&quot;igen&quot;);</span>
+<span class="nc" id="L177">        }</span>
+<span class="nc" id="L178">        pontMentese(player);</span>
+<span class="nc" id="L179">        System.out.println(&quot;Köszönjük a játékot!&quot;);</span>
+<span class="nc" id="L180">        be.close();</span>
+<span class="nc" id="L181">    }</span>
+
+    //ez a rész felel a mező megjelenítéséért
+    private static void megjelenit(final char[][] mezo) {
+<span class="nc" id="L185">        System.out.println(&quot; 1 2 3 4 5 6 7&quot;);</span>
+        /*mivel itt nem tudom beállítani neki hogy
+        &quot;ha az 1-es számot ütjuk be, a bal szélső (első) oszlopba dobja&quot;
+        ezért csak úgy tudtam megoldani hogy 0-val kezdődik
+        ezért kelle korábban letesztelnem,
+        hogy nagyobb számot írtak-e be mint 6
+        */
+<span class="nc" id="L192">        System.out.println(&quot;---------------&quot;);</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        for (char[] chars : mezo) {</span>
+<span class="nc" id="L194">            System.out.print(&quot;|&quot;);</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">            for (int oszlop = 0; oszlop &lt; mezo[0].length; oszlop++) {</span>
+<span class="nc" id="L196">                System.out.print(chars[oszlop]);</span>
+<span class="nc" id="L197">                System.out.print(&quot;|&quot;);</span>
+            }
+<span class="nc" id="L199">            System.out.println();</span>
+<span class="nc" id="L200">            System.out.println(&quot;---------------&quot;);</span>
+        }
+<span class="nc" id="L202">        System.out.println(&quot; 1 2 3 4 5 6 7&quot;);</span>
+<span class="nc" id="L203">        System.out.println();</span>
+<span class="nc" id="L204">    }</span>
+
+    static boolean ellenorzes(final int oszlop, final char[][] mezo) {
+        //leteszteli hogy megfelel-e az oszlop
+<span class="pc bpc" id="L208" title="2 of 4 branches missed.">        if (oszlop &lt; 0 || oszlop &gt; mezo[0].length) {</span>
+<span class="nc" id="L209">            System.out.println(&quot;Helytelen, lépés, lépjen újra&quot;);</span>
+<span class="nc" id="L210">            return false;</span>
+        }
+
+
+        //leteszteli hogy tele van-e az oszlop
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if (mezo[0][oszlop] != ' ') {</span>
+<span class="fc" id="L216">            System.out.println(&quot;Helytelen, lépés, lépjen újra&quot;);</span>
+<span class="fc" id="L217">            return false;</span>
+        }
+        //ha mind a kettő megbukott, akkor az érték igaz lesz, és tovább lép
+<span class="fc" id="L220">        return true;</span>
+    }
+
+    static boolean gyoztes(final char jatekos, final char[][] mezo) {
+        //megnézi hogy van-e 4 korong vízszintesen
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        for (char[] chars : mezo) {</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">            for (int oszlop = 0; oszlop &lt; mezo[0].length - MAX_TAVOLSAG;</span>
+<span class="fc" id="L227">                 oszlop++) {</span>
+<span class="pc bpc" id="L228" title="2 of 8 branches missed.">                if (chars[oszlop] == jatekos</span>
+                        &amp;&amp; chars[oszlop + 1] == jatekos
+                        &amp;&amp; chars[oszlop + 2] == jatekos
+                        &amp;&amp; chars[oszlop + MAX_TAVOLSAG] == jatekos) {
+<span class="fc" id="L232">                    return true;</span>
+                }
+            }
+        }
+        //ugyan ez függőre
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        for (int sor = 0; sor &lt; mezo.length - MAX_TAVOLSAG; sor++) {</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">            for (int oszlop = 0; oszlop &lt; mezo[0].length; oszlop++) {</span>
+<span class="pc bpc" id="L239" title="3 of 8 branches missed.">                if (mezo[sor][oszlop] == jatekos</span>
+                        &amp;&amp; mezo[sor + 1][oszlop] == jatekos
+                        &amp;&amp; mezo[sor + 2][oszlop] == jatekos
+                        &amp;&amp; mezo[sor + MAX_TAVOLSAG][oszlop] == jatekos) {
+<span class="fc" id="L243">                    return true;</span>
+                }
+            }
+        }
+        //bal fentről jobb lentre
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        for (int sor = MAX_TAVOLSAG; sor &lt; mezo.length; sor++) {</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">            for (int oszlop = 0; oszlop &lt; mezo[0].length - MAX_TAVOLSAG;</span>
+<span class="fc" id="L250">                 oszlop++) {</span>
+<span class="pc bpc" id="L251" title="5 of 8 branches missed.">                if (mezo[sor][oszlop] == jatekos</span>
+                        &amp;&amp; mezo[sor - 1][oszlop + 1] == jatekos
+                        &amp;&amp; mezo[sor - 2][oszlop + 2] == jatekos
+                        &amp;&amp; mezo[sor - MAX_TAVOLSAG][oszlop + MAX_TAVOLSAG]
+                        == jatekos) {
+<span class="nc" id="L256">                    return true;</span>
+                }
+            }
+        }
+        //bal lentről jobb fentre
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        for (int sor = 0; sor &lt; mezo.length - MAX_TAVOLSAG; sor++) {</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">            for (int oszlop = 0; oszlop &lt; mezo[0].length - MAX_TAVOLSAG;</span>
+<span class="fc" id="L263">                 oszlop++) {</span>
+<span class="pc bpc" id="L264" title="7 of 8 branches missed.">                if (mezo[sor][oszlop] == jatekos</span>
+                        &amp;&amp; mezo[sor + 1][oszlop + 1] == jatekos
+                        &amp;&amp; mezo[sor + 2][oszlop + 2] == jatekos
+                        &amp;&amp; mezo[sor + MAX_TAVOLSAG][oszlop + MAX_TAVOLSAG]
+                        == jatekos) {
+<span class="nc" id="L269">                    return true;</span>
+                }
+            }
+        }
+<span class="fc" id="L273">        return false;</span>
+    }
+
+    /*az &quot;AI&quot; lépései
+    egyedüli hátul ütő, hogy nem tudtam megoldani azt az esetet
+    amikor illegális (nem helyes lépést) hajt végre
+    */
+    static int ailepes(final char[][] mezo) {
+        //a Random-mal később fog foglalkozni, lényegében arra van,
+        // hogy valahova ledobja a korongot
+<span class="fc" id="L283">        Random rand = new Random();</span>
+        /*ezzel dobja le a korongot a gépnek
+        ezek mellet egy picit csal, mert a fő feladata,
+        hogy blokkolja a játékost, és persze keres egy helyes (nyerő) lépést
+         */
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        for (int oszlop = 0; oszlop &lt; OSZLOP; oszlop++) {</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">            if (ellenorzes(oszlop, mezo)) {</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">                for (int sor = mezo.length - 1; sor &gt;= 0; sor--) {</span>
+<span class="pc bpc" id="L291" title="1 of 2 branches missed.">                    if (mezo[sor][oszlop] == ' ') {</span>
+<span class="fc" id="L292">                        mezo[sor][oszlop] = 'P';  // Szimulál egy lépést</span>
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">                        if (gyoztes('P', mezo)) {</span>
+<span class="nc" id="L294">                            mezo[sor][oszlop] = ' '; // Vissza vonja a lépést</span>
+<span class="nc" id="L295">                            return oszlop; // Megvan a helyes lépés</span>
+                        }
+<span class="fc" id="L297">                        mezo[sor][oszlop] = ' '; // Visszavonja a dolgokat</span>
+<span class="fc" id="L298">                        break;</span>
+                    }
+                }
+            }
+        }
+        //ez a rész felel a játékos blokkolásáért
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        for (int oszlop = 0; oszlop &lt; OSZLOP; oszlop++) {</span>
+<span class="pc bpc" id="L305" title="1 of 2 branches missed.">            if (ellenorzes(oszlop, mezo)) {</span>
+                //a játékos lépésének szimulálása
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">                for (int sor = mezo.length - 1; sor &gt;= 0; sor--) {</span>
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">                    if (mezo[sor][oszlop] == ' ') {</span>
+<span class="fc" id="L309">                        mezo[sor][oszlop] = 'S';</span>
+                        //ideiglenesen lerakja (magának) a játékos korongját
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">                        if (gyoztes('S', mezo)) {</span>
+<span class="nc" id="L312">                            mezo[sor][oszlop] = ' '; //visszavonja a lépést</span>
+<span class="nc" id="L313">                            return oszlop; //blokkoló lépés megtalálva</span>
+                        }
+<span class="fc" id="L315">                        mezo[sor][oszlop] = ' ';</span>
+<span class="fc" id="L316">                        break;</span>
+                    }
+                }
+            }
+        }
+
+        //kiválaszt egy oszlpot
+        int lepes;
+        do {
+<span class="fc" id="L325">            lepes = rand.nextInt(OSZLOP);</span>
+<span class="pc bpc" id="L326" title="1 of 2 branches missed.">        } while (!ellenorzes(lepes, mezo));</span>
+
+<span class="fc" id="L328">        return lepes;</span>
+    }
+
+    /*file-ba írás
+    kiírja a pálya végső állapotát
+    */
+    static void mezoFileba(final char[][] mezo) throws IOException {
+<span class="nc" id="L335">        try (BufferedWriter writer =</span>
+                     new BufferedWriter(new FileWriter(&quot;vegso_allas.txt&quot;))) {
+<span class="nc" id="L337">            writer.write(&quot; 1 2 3 4 5 6 7\n&quot;);</span>
+<span class="nc" id="L338">            writer.write(&quot;---------------\n&quot;);</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">            for (char[] chars : mezo) {</span>
+<span class="nc" id="L340">                writer.write(&quot;|&quot;);</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">                for (int oszlop = 0; oszlop &lt; mezo[0].length; oszlop++) {</span>
+<span class="nc" id="L342">                    writer.write(chars[oszlop]);</span>
+<span class="nc" id="L343">                    writer.write(&quot;|&quot;);</span>
+                }
+<span class="nc" id="L345">                writer.write(&quot;\n---------------\n&quot;);</span>
+            }
+<span class="nc" id="L347">            writer.write(&quot; 1 2 3 4 5 6 7\n&quot;);</span>
+        }
+<span class="nc" id="L349">    }</span>
+
+    private static void pontMentese(final Jatekos jatekos) {
+<span class="nc" id="L352">        try (Connection conn =</span>
+<span class="nc" id="L353">                     DriverManager.getConnection(URL, USER, PASSWORD)) {</span>
+<span class="nc" id="L354">            Class.forName(&quot;com.mysql.cj.jdbc.Driver&quot;);</span>
+<span class="nc" id="L355">            String sql = &quot;INSERT INTO pontok (player_name, score) &quot;</span>
+                    + &quot;VALUES (?, ?)&quot;;
+<span class="nc" id="L357">            try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="nc" id="L358">                stmt.setString(1, jatekos.getNev());</span>
+<span class="nc" id="L359">                stmt.setInt(2, jatekos.getPont());</span>
+<span class="nc" id="L360">                stmt.executeUpdate();</span>
+<span class="nc" id="L361">                System.out.println(&quot;Az eredmény sikeresen elmentve &quot;</span>
+                        + &quot;az adatbázisba!&quot;);
+            }
+<span class="nc" id="L364">        } catch (Exception e) {</span>
+<span class="nc" id="L365">            System.out.println(&quot;Hiba történt az adatbázis művelet során: &quot;</span>
+<span class="nc" id="L366">                    + e.getMessage());</span>
+<span class="nc" id="L367">        }</span>
+<span class="nc" id="L368">    }</span>
+}
+
+//MF DOOM
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
