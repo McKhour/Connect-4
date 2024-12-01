@@ -2,20 +2,20 @@ package org.example;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Random;
 import java.util.Scanner;
-/*import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-*/
+
 final class Connect4Main {
-    /*
-        private static final String DB_URL =
-        "jdbc:mysql://localhost:3306/connect4";
-        private static final String DB_USER = "root";
-        private static final String DB_PASSWORD = "";
-    */
+
+    public static final String url = "jdbc:mysql://localhost:3306/connect4";
+    public static final String user = "root";
+    public static final String password = "";
+
     private Connect4Main() {
         throw new UnsupportedOperationException(
                 "Ez egy utility class és nem lehet példányosítani");
@@ -38,9 +38,25 @@ final class Connect4Main {
     public static final int MAX_TAVOLSAG = 3;
 
     public static void main(final String[] args) {
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(url,user,password);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from pontok");
+            while (resultSet.next()){
+                System.out.println(resultSet.getInt(1) + " "
+                        + resultSet.getString(2) + " "
+                        + resultSet.getInt(3));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         Scanner be = new Scanner(System.in);
         System.out.println("Kérem adja meg a játékos nevét!");
         String nev = be.nextLine();
+        int pont = 0;
         boolean playAgain = true;
         while (playAgain) {
             //itt határozuk meg a méreteit (sor és oszlop)
@@ -105,6 +121,7 @@ final class Connect4Main {
                     System.out.println("A gép nyert");
                 } else {
                     System.out.println(nev + " nyert");
+                    pont++;
                 }
             } else { //igen, lehet döntetlen is
                 System.out.println("Döntetlen");
@@ -121,6 +138,7 @@ final class Connect4Main {
             String response = be.next().toLowerCase();
             playAgain = response.equals("igen");
         }
+        saveScore(nev, pont);
         System.out.println("Köszönjük a játékot!");
         be.close();
     }
@@ -292,6 +310,21 @@ final class Connect4Main {
                 writer.write("\n---------------\n");
             }
             writer.write(" 0 1 2 3 4 5 6\n");
+        }
+    }
+
+    private static void saveScore(String playerName, int score) {
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String sql = "INSERT INTO pontok (player_name, score) VALUES (?, ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, playerName);
+                stmt.setInt(2, score);
+                stmt.executeUpdate();
+                System.out.println("Az eredmény sikeresen elmentve az adatbázisba!");
+            }
+        } catch (Exception e) {
+            System.out.println("Hiba történt az adatbázis művelet során: " + e.getMessage());
         }
     }
 }
