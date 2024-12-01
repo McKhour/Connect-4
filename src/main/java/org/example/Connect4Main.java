@@ -11,7 +11,8 @@ import java.sql.SQLException;
 */
 final class Connect4Main {
     /*
-        private static final String DB_URL = "jdbc:mysql://localhost:3306/connect4";
+        private static final String DB_URL =
+        "jdbc:mysql://localhost:3306/connect4";
         private static final String DB_USER = "root";
         private static final String DB_PASSWORD = "";
     */
