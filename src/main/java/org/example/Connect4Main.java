@@ -59,40 +59,43 @@ final class Connect4Main {
                 Válassza ki mit szeretne:
                 Játék indítása: \t1
                  Pont táblázat: \t2""");
-            if (donto.nextInt() == 2) {
-                System.out.println("------------------------------");
-                try {
-                    Class.forName("com.mysql.cj.jdbc.Driver");
-                    Connection connection =
-                            DriverManager.getConnection(URL, USER, PASSWORD);
-                    Statement statement = connection.createStatement();
-                    ResultSet resultSet =
-                            statement.executeQuery("select * from pontok");
-                    while (resultSet.next()) {
-                        System.out.println(resultSet.getInt(1) + " "
-                                + resultSet.getString(2) + " "
-                                + resultSet.getInt(HARMAS));
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+        //Ez egy kisebb menű szerűség lenne
+        if (donto.nextInt() == 2) {
+            System.out.println("------------------------------");
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection connection =
+                        DriverManager.getConnection(URL, USER, PASSWORD);
+                Statement statement = connection.createStatement();
+                ResultSet resultSet =
+                        statement.executeQuery("select * from pontok");
+                while (resultSet.next()) {
+                    System.out.println(resultSet.getInt(1) + " "
+                            + resultSet.getString(2) + " "
+                            + resultSet.getInt(HARMAS));
                 }
-                System.out.println("------------------------------");
-                System.out.println("A visszalépéshez nyomja meg a 0-s gombot!");
-                if (donto.nextInt() != 0) {
-                    System.out.println("Igazából mindegy mit nyom meg");
-                    TimeUnit.SECONDS.sleep(1);
-                }
-                System.out.println("Kezdődjék a játék!");
-            } else {
-                System.out.println("Kérem helyes értéket adjon legközelebb");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+            System.out.println("------------------------------");
+            System.out.println("A visszalépéshez nyomja meg a 0-s gombot!");
+            if (donto.nextInt() != 0) {
+                System.out.println("Igazából mindegy mit nyom meg");
+                //viccess akartam lenni
+                TimeUnit.SECONDS.sleep(1);
+            }
+            System.out.println("Kezdődjék a játék!");
+        } else {
+            System.out.println("Kérem helyes értéket adjon legközelebb");
+        }
         System.out.println("Kezdődjék a játék");
-        //donto.close();
         TimeUnit.SECONDS.sleep(1);
         System.out.println("Kérem adja meg a játékos nevét!");
         Scanner be = new Scanner(System.in);
         String nev = be.nextLine();
         Jatekos player = new Jatekos(nev, 0);
+        //itt van a teljes játék önmaga
+        //minden egy while ciklusban
         boolean ujabbKor = true;
         while (ujabbKor) {
             //itt határozuk meg a méreteit (sor és oszlop)
@@ -103,6 +106,7 @@ final class Connect4Main {
                     mezo[sor][oszlop] = ' ';
                 }
             }
+            //ez a szerkentyű később még jól jöhet
             int kor = 1;
             char jatekos = 'S';
             boolean nyertes = false;
@@ -169,7 +173,7 @@ final class Connect4Main {
                 System.out.println("Hiba történt a fájl írásakor: "
                         + e.getMessage());
             }
-
+            // ha végig ment a kör és van eredmény, ide dobódunk le
             TimeUnit.SECONDS.sleep(2);
             System.out.println("Szeretne új játékot játszani? (igen/nem)");
             String valasz = be.next().toLowerCase();
@@ -183,12 +187,6 @@ final class Connect4Main {
     //ez a rész felel a mező megjelenítéséért
     private static void megjelenit(final char[][] mezo) {
         System.out.println(" 1 2 3 4 5 6 7");
-        /*mivel itt nem tudom beállítani neki hogy
-        "ha az 1-es számot ütjuk be, a bal szélső (első) oszlopba dobja"
-        ezért csak úgy tudtam megoldani hogy 0-val kezdődik
-        ezért kelle korábban letesztelnem,
-        hogy nagyobb számot írtak-e be mint 6
-        */
         System.out.println("---------------");
         for (char[] chars : mezo) {
             System.out.print("|");
@@ -312,14 +310,16 @@ final class Connect4Main {
                             mezo[sor][oszlop] = ' '; //visszavonja a lépést
                             return oszlop; //blokkoló lépés megtalálva
                         }
-                        mezo[sor][oszlop] = ' ';
+                        mezo[sor][oszlop] = ' '; //visszavonja a dolgokat
                         break;
                     }
                 }
             }
         }
-
-        //kiválaszt egy oszlpot
+        /*ha nem érzékeli hogy tudna nyerni, vagy a játékost meg
+        tudja akadályozni egy győzelemtől, akkor
+        kiválaszt egy oszlpot random, ahova bedobhassa a korongot
+         */
         int lepes;
         do {
             lepes = rand.nextInt(OSZLOP);
@@ -347,7 +347,7 @@ final class Connect4Main {
             writer.write(" 1 2 3 4 5 6 7\n");
         }
     }
-
+    //Ez az SQL/JDBC miatt szükséges
     private static void pontMentese(final Jatekos jatekos) {
         try (Connection conn =
                      DriverManager.getConnection(URL, USER, PASSWORD)) {
