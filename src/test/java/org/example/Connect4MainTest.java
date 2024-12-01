@@ -1,5 +1,6 @@
 package org.example;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import java.io.BufferedWriter;
@@ -7,8 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class Connect4MainTest {
 
@@ -102,6 +103,7 @@ class Connect4MainTest {
     void testGameFlow() {
         Scanner scannerMock = Mockito.mock(Scanner.class);
         Mockito.when(scannerMock.nextInt()).thenReturn(0, 1, 2, 3);
-        Mockito.when(scannerMock.nextLine()).thenReturn("Player");
+        Mockito.when(scannerMock.nextLine()).thenReturn("Jatekos");
     }
+
 }
