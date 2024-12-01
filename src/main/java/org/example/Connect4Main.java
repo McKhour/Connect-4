@@ -367,5 +367,3 @@ final class Connect4Main {
         }
     }
 }
-
-//MF DOOM
